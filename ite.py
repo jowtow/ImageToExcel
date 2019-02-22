@@ -1,4 +1,5 @@
 import openpyxl
+import sys
 from openpyxl import Workbook
 from openpyxl.styles import Color, PatternFill, Font, Border
 from openpyxl.styles import colors
@@ -20,8 +21,16 @@ def normalizeCells(ws,height,width):
     for i in range(1,height):
         ws.row_dimensions[i].height = 5
 
+def fillCellsWithPixels(ws,pixels,height,width):
+    for i in range(1,width):
+        x = getColumnStr(i)
+        for y in range(1,height):
+            hexColor = '%02x%02x%02x' % pixels[i,y]
+            fill1 = PatternFill(fill_type='solid',start_color=hexColor,end_color=hexColor)
+            ws.cell(row=y,column=i).fill = fill1
+
 #Setup image
-im = Image.open("genericCowboy.jpg")
+im = Image.open(sys.argv[1])
 pixels = im.load()
 width = im.size[0]
 height = im.size[1]
@@ -33,6 +42,6 @@ ws.insert_cols(width)
 ws.insert_rows(height)
 
 normalizeCells(ws,height,width)
-
+fillCellsWithPixels(ws,pixels,height,width)
 
 wb.save('test.xlsx')
