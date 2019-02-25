@@ -1,5 +1,8 @@
 import openpyxl
+import os
 import sys
+import datetime
+
 from openpyxl import Workbook
 from openpyxl.styles import Color, PatternFill, Font, Border
 from openpyxl.styles import colors
@@ -47,23 +50,46 @@ def getSensitivityPixels(pixels,height,width,pixelation):
     return newPixels
 
 
+def getRgbHarshPixels(pixels, harshness):
+    h = pow(2,harshness)
+    for i in range(len(pixels)):
+        for j in range(len(pixels[i])):
+                r = round(pixels[i][j][0]/h)*h
+                g = round(pixels[i][j][1]/h)*h
+                b = round(pixels[i][j][2]/h)*h
+                if r > 255:
+                    r = 255
+                if g > 255:
+                    g = 255
+                if b > 255:
+                    b = 255
+                pixels[i][j] = [r,g,b]
+    return pixels
+
 def fillCellsWithPixels(ws,pixels,height,width):
     for i in range(1,width):
+        os.system("cls")
+        print(str(float(i/(1.0*width))*100)+"%")
         x = getColumnStr(i)
         for y in range(1,height):
-            hexColor = '%02x%02x%02x' % pixels[i][y]
+            color = pixels[i][y]
+            hexColor = '%02x%02x%02x' % (color[0],color[1],color[2])
             fill1 = PatternFill(fill_type='solid',start_color=hexColor,end_color=hexColor)
             ws.cell(row=y,column=i).fill = fill1
 
 pixelation = 1
+rgbHarsh = 0
 if(len(sys.argv) > 2):
     pixelation = int(sys.argv[2])
+if(len(sys.argv) > 3):
+    rgbHarsh = int(sys.argv[3])
 #Setup image
 im = Image.open(sys.argv[1])
 pixels = im.load()
 width = int(im.size[0] / pixelation)
 height = int(im.size[1] / pixelation)
-pixels = getSensitivityPixels(pixels,height,width,pixelation)
+if (pixelation >= 1):
+    pixels = getSensitivityPixels(pixels,height,width,pixelation)
 
 #Setup worksheet
 wb = Workbook()
@@ -71,7 +97,12 @@ ws = wb.active
 ws.insert_cols(width)
 ws.insert_rows(height)
 
+
 normalizeCells(ws,height,width)
+if(rgbHarsh > 0 ):
+    pixels = getRgbHarshPixels(pixels, rgbHarsh)
 fillCellsWithPixels(ws,pixels,height,width)
 
-wb.save('test.xlsx')
+
+fileString = datetime.datetime.now().strftime("%m-%d-%Y___%H-%M-%S")
+wb.save("results/" + fileString + '.xlsx')
