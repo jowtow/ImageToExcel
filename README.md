@@ -10,4 +10,4 @@ Python script to convert an image to a bunch of excel cells
 ### Example
   python ite.py .\img\kangaroo.jpg 2 5
 
-!(https://github.com/JohnWTownsend/ImageToExcel/img/kangarooExample.jpg)
+![kangaroo](https://github.com/JohnWTownsend/ImageToExcel/blob/master/img/kangarooExample.jpg)
