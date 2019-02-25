@@ -8,6 +8,6 @@ Python script to convert an image to a bunch of excel cells
 3. Color Saturation |  value range [0..8]
 
 ### Example
-  python ite.py .\img\kangaroo.jpg 2 5
+  python ite.py .\img\kangaroo.jpg -p 2 -s 5
 
-![kangaroo](https://github.com/JohnWTownsend/ImageToExcel/blob/master/img/kangarooExample.jpg)
+![kangaroo](img/kangarooExample.jpg)
