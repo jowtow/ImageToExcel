@@ -7,6 +7,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Color, PatternFill, Font, Border
 from openpyxl.styles import colors
 from openpyxl.cell import Cell
+
 from PIL import Image
 
 def getColumnStr(num):
@@ -69,13 +70,16 @@ def getRgbHarshPixels(pixels, harshness):
 def fillCellsWithPixels(ws,pixels,height,width):
     for i in range(1,width):
         os.system("cls")
-        print(str(float(i/(1.0*width))*100)+"%")
+        print( str(round(float(i/(1.0*width))*100,2))+"%")
         x = getColumnStr(i)
         for y in range(1,height):
             color = pixels[i][y]
             hexColor = '%02x%02x%02x' % (color[0],color[1],color[2])
             fill1 = PatternFill(fill_type='solid',start_color=hexColor,end_color=hexColor)
             ws.cell(row=y,column=i).fill = fill1
+    os.system('cls')
+    print("100%")
+
 
 pixelation = 1
 rgbHarsh = 0
@@ -88,8 +92,7 @@ im = Image.open(sys.argv[1])
 pixels = im.load()
 width = int(im.size[0] / pixelation)
 height = int(im.size[1] / pixelation)
-if (pixelation >= 1):
-    pixels = getSensitivityPixels(pixels,height,width,pixelation)
+
 
 #Setup worksheet
 wb = Workbook()
@@ -98,9 +101,12 @@ ws.insert_cols(width)
 ws.insert_rows(height)
 
 
-normalizeCells(ws,height,width)
+if (pixelation >= 1):
+    pixels = getSensitivityPixels(pixels,height,width,pixelation)
 if(rgbHarsh > 0 ):
     pixels = getRgbHarshPixels(pixels, rgbHarsh)
+
+normalizeCells(ws,height,width)
 fillCellsWithPixels(ws,pixels,height,width)
 
 
