@@ -2,6 +2,7 @@ import openpyxl
 import os
 import sys
 import datetime
+import argparse
 
 from openpyxl import Workbook
 from openpyxl.styles import Color, PatternFill, Font, Border
@@ -69,29 +70,27 @@ def getRgbHarshPixels(pixels, harshness):
 
 def fillCellsWithPixels(ws,pixels,height,width):
     for i in range(1,width):
-        os.system("cls")
-        print( str(round(float(i/(1.0*width))*100,2))+"%")
+        print(f'{round(i/(1.0*width)*100,2)}%', end='\r')
         x = getColumnStr(i)
         for y in range(1,height):
             color = pixels[i][y]
-            hexColor = '%02x%02x%02x' % (color[0],color[1],color[2])
+            hexColor = '%02x%02x%02x' % tuple(color)
             fill1 = PatternFill(fill_type='solid',start_color=hexColor,end_color=hexColor)
             ws.cell(row=y,column=i).fill = fill1
-    os.system('cls')
-    print("100%")
+    print("100%   ", end='\r')
 
 
-pixelation = 1
-rgbHarsh = 0
-if(len(sys.argv) > 2):
-    pixelation = int(sys.argv[2])
-if(len(sys.argv) > 3):
-    rgbHarsh = int(sys.argv[3])
+parser = argparse.ArgumentParser(description="ImageToExcel")
+parser.add_argument('file', type=str, help="the filepath of image to convert to excel")
+parser.add_argument('-p', '--pixelation', type=int, default=1, help="how pixilated you want the image to be")
+parser.add_argument('-s','--saturation', type=int, default=0, choices=list(range(0,9)), help="how saturated you want the image to be")
+args = parser.parse_args()
+
 #Setup image
-im = Image.open(sys.argv[1])
+im = Image.open(args.file)
 pixels = im.load()
-width = int(im.size[0] / pixelation)
-height = int(im.size[1] / pixelation)
+width = int(im.size[0] / args.pixelation)
+height = int(im.size[1] / args.pixelation)
 
 
 #Setup worksheet
@@ -101,10 +100,10 @@ ws.insert_cols(width)
 ws.insert_rows(height)
 
 
-if (pixelation >= 1):
-    pixels = getSensitivityPixels(pixels,height,width,pixelation)
-if(rgbHarsh > 0 ):
-    pixels = getRgbHarshPixels(pixels, rgbHarsh)
+if (args.pixelation >= 1):
+    pixels = getSensitivityPixels(pixels,height,width,args.pixelation)
+if(args.saturation > 0 ):
+    pixels = getRgbHarshPixels(pixels, args.saturation)
 
 normalizeCells(ws,height,width)
 fillCellsWithPixels(ws,pixels,height,width)
