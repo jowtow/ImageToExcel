@@ -21,19 +21,49 @@ def normalizeCells(ws,height,width):
     for i in range(1,height):
         ws.row_dimensions[i].height = 5
 
+def getSensitivityPixels(pixels,height,width,pixelation):
+    newPixels = []
+    for x in range(width):
+        pixelRow = []
+        for y in range(height):
+            pixel = ''
+            r = []
+            g = []
+            b = []
+            
+            for i in range(pixelation):
+                x1 = x*pixelation
+                for j in range(pixelation):
+                    y1 = y*pixelation
+                    rgb = pixels[x1 + i, y1 + j] 
+                    r.append(rgb[0])
+                    g.append(rgb[1])
+                    b.append(rgb[2])
+            rAvg = int(sum(r) / float(len(r)))
+            gAvg = int(sum(g) / float(len(g)))
+            bAvg = int(sum(b) / float(len(b)))
+            pixelRow.append((rAvg,gAvg,bAvg))
+        newPixels.append(pixelRow)
+    return newPixels
+
+
 def fillCellsWithPixels(ws,pixels,height,width):
     for i in range(1,width):
         x = getColumnStr(i)
         for y in range(1,height):
-            hexColor = '%02x%02x%02x' % pixels[i,y]
+            hexColor = '%02x%02x%02x' % pixels[i][y]
             fill1 = PatternFill(fill_type='solid',start_color=hexColor,end_color=hexColor)
             ws.cell(row=y,column=i).fill = fill1
 
+pixelation = 1
+if(len(sys.argv) > 2):
+    pixelation = int(sys.argv[2])
 #Setup image
 im = Image.open(sys.argv[1])
 pixels = im.load()
-width = im.size[0]
-height = im.size[1]
+width = int(im.size[0] / pixelation)
+height = int(im.size[1] / pixelation)
+pixels = getSensitivityPixels(pixels,height,width,pixelation)
 
 #Setup worksheet
 wb = Workbook()
